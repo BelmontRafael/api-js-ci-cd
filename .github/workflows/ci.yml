@@ -19,3 +19,7 @@ jobs:
     name: Build
     uses: ./.github/workflows/ci-build.yml
 
+  unit_tests:
+    name: Unit Tests
+    uses: ./.github/workflows/ci-unit-tests.yml
+    needs: build

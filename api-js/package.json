@@ -14,8 +14,8 @@
     "build": "node --check index.js && node --check router.js",
     "lint": "eslint . --max-warnings=0",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "node --test tests/unit/**/*.test.js",
-    "test:integration": "node --test tests/integration/**/*.test.js"
+    "test:unit": "node --test tests/unit/*.test.js",
+    "test:integration": "node --test tests/integration/*.test.js"
   },
   "keywords": [],
   "author": "",
