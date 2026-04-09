@@ -23,3 +23,15 @@ jobs:
     name: Unit Tests
     uses: ./.github/workflows/ci-unit-tests.yml
     needs: build
+
+  integration_tests:
+    name: Integration Tests
+    uses: ./.github/workflows/ci-integration-tests.yml
+    needs: build
+    with:
+      db_name: db_exercicio
+      db_user: postgres
+      db_host: 127.0.0.1
+      db_dialect: postgres
+    secrets:
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
