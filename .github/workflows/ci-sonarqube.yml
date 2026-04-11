@@ -1,0 +1,52 @@
+name: SonarQube
+
+on:
+  workflow_call:
+    secrets:
+      SONAR_TOKEN:
+        required: false
+      SONAR_HOST_URL:
+        required: false
+      SONAR_PROJECT_KEY:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  sonarqube:
+    runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate SonarQube secrets
+        id: sonar_config
+        shell: bash
+        run: |
+          if [ -n "${SONAR_TOKEN}" ] && [ -n "${SONAR_HOST_URL}" ] && [ -n "${SONAR_PROJECT_KEY}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: SonarQube Scan
+        if: steps.sonar_config.outputs.enabled == 'true'
+        uses: SonarSource/sonarqube-scan-action@v5
+        with:
+          projectBaseDir: "api-js"
+          args: >
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.sources=.
+            -Dsonar.tests=tests
+
+      - name: SonarQube skipped
+        if: steps.sonar_config.outputs.enabled != 'true'
+        run: echo "SonarQube skipped because SONAR_TOKEN, SONAR_HOST_URL, or SONAR_PROJECT_KEY is missing."
