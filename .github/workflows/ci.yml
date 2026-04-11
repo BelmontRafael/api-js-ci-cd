@@ -49,3 +49,11 @@ jobs:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+
+  sast:
+    name: SAST
+    uses: ./.github/workflows/ci-sast.yml
+    needs: [unit_tests, integration_tests, lints]
+    permissions:
+      contents: read
+      security-events: write
