@@ -3,7 +3,4 @@ npm-debug.log
 .git
 .gitignore
 .env
-.env.*
 coverage
-**/*.test.js
-tests

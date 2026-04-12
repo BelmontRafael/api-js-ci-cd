@@ -1,0 +1,47 @@
+name: CD DAST OWASP ZAP
+
+on:
+  workflow_call:
+    inputs:
+      target_url:
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  zap_baseline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check target URL
+        id: target
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.target_url }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run OWASP ZAP baseline scan
+        if: steps.target.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          docker run --rm \
+            -v "$PWD:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t "${{ inputs.target_url }}" -I -r zap-report.html
+
+      - name: Upload ZAP report
+        if: steps.target.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap-report.html
+
+      - name: DAST skipped
+        if: steps.target.outputs.enabled != 'true'
+        run: echo "DAST skipped because target_url is not configured. Set repository variable RENDER_HOMOLOG_URL."

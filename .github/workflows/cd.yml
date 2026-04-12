@@ -23,3 +23,17 @@ jobs:
       environment_name: homolog
     secrets:
       DEPLOY_HOOK_URL: ${{ secrets.RENDER_HOMOLOG_DEPLOY_HOOK }}
+
+  dast_homolog:
+    name: DAST (OWASP ZAP)
+    needs: deploy_homolog
+    uses: ./.github/workflows/cd-dast-zap.yml
+    with:
+      target_url: ${{ vars.RENDER_HOMOLOG_URL }}
+
+  manual_approval:
+    name: Aprovacao Manual
+    needs: dast_homolog
+    uses: ./.github/workflows/cd-manual-approval.yml
+    with:
+      environment_name: production
