@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - "api-js/**"
+      - ".github/workflows/ci*.yml"
+  pull_request:
+    paths:
+      - "api-js/**"
+      - ".github/workflows/ci*.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/ci-build.yml
+
+  unit_tests:
+    name: Unit Tests
+    uses: ./.github/workflows/ci-unit-tests.yml
+    needs: build
+
+  integration_tests:
+    name: Integration Tests
+    uses: ./.github/workflows/ci-integration-tests.yml
+    needs: build
+    with:
+      db_name: db_exercicio
+      db_user: postgres
+      db_host: 127.0.0.1
+      db_dialect: postgres
+    secrets:
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+  lints:
+    name: Lint
+    uses: ./.github/workflows/ci-lint.yml
+    needs: [build, unit_tests, integration_tests]
+  
+  sonarqube:
+    name: SonarQube
+    uses: ./.github/workflows/ci-sonarqube.yml
+    needs: [unit_tests, integration_tests, lints]
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+
+  sast:
+    name: SAST
+    uses: ./.github/workflows/ci-sast.yml
+    needs: [unit_tests, integration_tests, lints]
+    permissions:
+      contents: read
+      security-events: write

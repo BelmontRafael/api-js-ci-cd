@@ -1,0 +1,25 @@
+name: CD Orchestrator
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "api-js/**"
+      - ".github/workflows/cd*.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy_homolog:
+    name: Deploy Homolog (Render)
+    uses: ./.github/workflows/cd-deploy-render.yml
+    with:
+      environment_name: homolog
+    secrets:
+      DEPLOY_HOOK_URL: ${{ secrets.RENDER_HOMOLOG_DEPLOY_HOOK }}
