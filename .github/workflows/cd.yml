@@ -37,3 +37,12 @@ jobs:
     uses: ./.github/workflows/cd-manual-approval.yml
     with:
       environment_name: production
+
+  deploy_production:
+    name: Deploy Producao (Render)
+    needs: manual_approval
+    uses: ./.github/workflows/cd-deploy-render.yml
+    with:
+      environment_name: production
+    secrets:
+      DEPLOY_HOOK_URL: ${{ secrets.RENDER_PROD_DEPLOY_HOOK }}
