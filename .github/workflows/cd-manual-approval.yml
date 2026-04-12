@@ -1,0 +1,24 @@
+name: CD Manual Approval
+
+on:
+  workflow_call:
+    inputs:
+      environment_name:
+        required: false
+        type: string
+        default: production
+
+permissions:
+  contents: read
+
+jobs:
+  wait_approval:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment_name }}
+
+    steps:
+      - name: Await environment approval
+        run: echo "Aguardando aprovacao manual do ambiente ${INPUT_ENV}."
+        env:
+          INPUT_ENV: ${{ inputs.environment_name }}
